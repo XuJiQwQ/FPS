@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>FPS 遊戲介紹</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --pink:#f9c4d0;
+  --pink2:#f4a0b5;
+  --pink3:#e8738a;
+  --red:#e03055;
+  --warm:#fff5f7;
+  --white:#ffffff;
+  --dark:#1a0a10;
+  --gray:#5a3040;
+  --light:#fde8ef;
+  --accent:#c2185b;
+  --gold:#ffb74d;
+  --slide-dur:700ms;
+}
+html,body{height:100%;overflow:hidden;background:#fff0f3;font-family:'Noto Sans TC',sans-serif}
+
+/* ── CONTROLS ── */
+.controls{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%);
+  z-index:100;display:flex;align-items:center;gap:14px;
+  background:rgba(255,255,255,0.92);border:1.5px solid var(--pink2);
+  border-radius:50px;padding:10px 22px;box-shadow:0 4px 24px rgba(224,48,85,0.13);
+  backdrop-filter:blur(8px);
+}
+.ctrl-btn{
+  width:38px;height:38px;border-radius:50%;border:1.5px solid var(--pink2);
+  background:var(--white);color:var(--red);font-size:16px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.ctrl-btn:hover{background:var(--pink);color:var(--dark)}
+.ctrl-btn.active{background:var(--red);color:#fff;border-color:var(--red)}
+#play-btn{width:46px;height:46px;font-size:18px;background:var(--red);color:#fff;border-color:var(--red)}
+#play-btn:hover{background:var(--accent)}
+.dots{display:flex;gap:8px;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--pink2);cursor:pointer;transition:all .3s}
+.dot.active{width:20px;border-radius:4px;background:var(--red)}
+.slide-counter{font-family:'Space Mono',monospace;font-size:13px;color:var(--gray);min-width:40px;text-align:center}
+
+/* ── SLIDES WRAPPER ── */
+.slides-wrapper{
+  width:100%;height:100vh;position:relative;overflow:hidden;
+}
+.slide{
+  position:absolute;inset:0;
+  opacity:0;transform:translateX(60px);
+  transition:opacity var(--slide-dur) cubic-bezier(.4,0,.2,1),
+             transform var(--slide-dur) cubic-bezier(.4,0,.2,1);
+  pointer-events:none;overflow:hidden;
+  display:flex;flex-direction:column;
+  padding-bottom:90px;
+}
+.slide.active{
+  opacity:1;transform:translateX(0);pointer-events:auto;
+}
+.slide.exit{
+  opacity:0;transform:translateX(-60px);
+}
+
+/* ── SLIDE ANIMATIONS ── */
+.stagger{opacity:0;transform:translateY(32px);transition:opacity .55s ease,transform .55s ease}
+.slide.active .stagger{opacity:1;transform:translateY(0)}
+.slide.active .stagger:nth-child(1){transition-delay:.08s}
+.slide.active .stagger:nth-child(2){transition-delay:.18s}
+.slide.active .stagger:nth-child(3){transition-delay:.28s}
+.slide.active .stagger:nth-child(4){transition-delay:.38s}
+.slide.active .stagger:nth-child(5){transition-delay:.48s}
+.slide.active .stagger:nth-child(6){transition-delay:.58s}
+.slide.active .stagger:nth-child(7){transition-delay:.68s}
+.slide.active .stagger:nth-child(8){transition-delay:.78s}
+
+
+
+/* ═══════════════════════════════════════
+   SLIDE 1: COVER
+═══════════════════════════════════════ */
+#slide-0{
+  background:linear-gradient(135deg,#fff0f3 0%,#ffe4ec 50%,#fff8fa 100%);
+  justify-content:center;align-items:center;text-align:center;
+}
+.cover-deco{
+  position:absolute;inset:0;overflow:hidden;pointer-events:none;
+}
+.cover-deco span{
+  position:absolute;border-radius:50%;opacity:.18;
+}
+.cover-deco .c1{width:420px;height:420px;background:var(--pink2);top:-80px;right:-100px}
+.cover-deco .c2{width:280px;height:280px;background:var(--red);bottom:-60px;left:-60px}
+.cover-deco .c3{width:150px;height:150px;background:var(--pink);top:40%;left:5%}
+.cover-inner{position:relative;z-index:1;max-width:820px;padding:0 32px}
+.cover-tag{
+  display:inline-block;background:var(--red);color:#fff;
+  font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  padding:6px 18px;border-radius:20px;margin-bottom:28px;
+}
+.cover-title{
+  font-size:clamp(52px,8vw,96px);font-weight:900;line-height:1.05;
+  color:var(--dark);letter-spacing:-2px;margin-bottom:20px;
+}
+.cover-title em{
+  color:var(--red);font-style:normal;
+  text-decoration:underline;text-underline-offset:6px;
+  text-decoration-thickness:3px;text-decoration-color:var(--pink2);
+}
+.cover-sub{
+  font-size:clamp(16px,2.5vw,22px);color:var(--gray);line-height:1.6;
+  font-weight:400;max-width:560px;margin:0 auto 36px;
+}
+.cover-sub strong{color:var(--accent)}
+.cover-pills{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.pill{
+  background:var(--white);border:1.5px solid var(--pink2);
+  color:var(--dark);padding:8px 18px;border-radius:30px;font-size:14px;font-weight:700;
+  display:flex;align-items:center;gap:8px;
+}
+.pill i{color:var(--red);font-size:16px}
+
+/* ═══════════════════════════════════════
+   SLIDE 2: WHAT IS FPS
+═══════════════════════════════════════ */
+#slide-1{
+  background:#fff8fa;
+  padding:0 5vw;
+}
+.s-header{
+  padding:40px 0 24px;
+  border-bottom:2px solid var(--pink);
+  display:flex;align-items:center;gap:16px;
+}
+.s-num{
+  font-family:'Space Mono',monospace;font-size:13px;
+  background:var(--red);color:#fff;padding:3px 10px;border-radius:6px;font-weight:700;
+}
+.s-title{
+  font-size:clamp(28px,4vw,48px);font-weight:900;color:var(--dark);
+  letter-spacing:-1px;
+}
+.s-title u{text-underline-offset:5px;text-decoration-color:var(--pink2)}
+.s-title em{color:var(--red);font-style:normal}
+.def-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:20px;
+  padding:28px 0;flex:1;
+}
+.def-card{
+  background:var(--white);border-radius:18px;
+  border:1.5px solid var(--pink);padding:24px 26px;
+  position:relative;overflow:hidden;
+}
+.def-card::before{
+  content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--red);
+}
+.def-card .icon-wrap{
+  width:48px;height:48px;border-radius:14px;background:var(--light);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:14px;
+}
+.def-card .icon-wrap i{color:var(--red);font-size:22px}
+.def-card h3{
+  font-size:17px;font-weight:900;color:var(--dark);margin-bottom:10px;
+  line-height:1.3;
+}
+.def-card h3 strong{
+  background:var(--pink);padding:1px 6px;border-radius:4px;
+}
+.def-card p{font-size:14px;color:var(--gray);line-height:1.7}
+.def-card p em{color:var(--red);font-style:normal;font-weight:700}
+.def-card p u{text-underline-offset:3px;text-decoration-color:var(--pink2)}
+
+/* ═══════════════════════════════════════
+   SLIDE 3: CORE MECHANICS
+═══════════════════════════════════════ */
+#slide-2{
+  background:linear-gradient(180deg,#fff8fa 0%,#fff0f3 100%);
+  padding:0 5vw;
+}
+.mechanics-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:16px;
+  padding:28px 0;flex:1;
+}
+.mech-card{
+  background:var(--white);border:1.5px solid var(--pink);border-radius:16px;
+  padding:22px 20px;display:flex;flex-direction:column;gap:10px;
+}
+.mech-icon{
+  width:44px;height:44px;background:var(--light);border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+}
+.mech-icon i{color:var(--red);font-size:20px}
+.mech-card h4{font-size:16px;font-weight:900;color:var(--dark)}
+.mech-card h4 u{text-underline-offset:3px;text-decoration-color:var(--pink2)}
+.mech-card ul{padding-left:0;list-style:none;display:flex;flex-direction:column;gap:5px}
+.mech-card ul li{
+  font-size:13px;color:var(--gray);line-height:1.5;
+  padding-left:16px;position:relative;
+}
+.mech-card ul li::before{
+  content:'';position:absolute;left:2px;top:8px;
+  width:7px;height:7px;border-radius:50%;background:var(--pink2);
+}
+.mech-card ul li strong{color:var(--accent);font-weight:700}
+.mech-card ul li em{color:var(--red);font-style:normal}
+
+/* ═══════════════════════════════════════
+   SLIDE 4: STRATEGY
+═══════════════════════════════════════ */
+#slide-3{
+  background:#fff8fa;padding:0 5vw;
+}
+.strategy-layout{
+  display:grid;grid-template-columns:1fr 1fr;gap:24px;
+  padding:28px 0;flex:1;
+}
+.strat-main{
+  background:var(--red);border-radius:20px;padding:30px;color:#fff;
+  display:flex;flex-direction:column;gap:14px;
+}
+.strat-main .big-icon{font-size:48px;color:rgba(255,255,255,.4)}
+.strat-main h3{font-size:26px;font-weight:900;line-height:1.2}
+.strat-main h3 u{text-underline-offset:4px;text-decoration-color:rgba(255,255,255,.5)}
+.strat-main p{font-size:15px;line-height:1.7;opacity:.9}
+.strat-main p em{font-style:normal;font-weight:700;background:rgba(255,255,255,.2);padding:1px 6px;border-radius:4px}
+.strat-right{display:flex;flex-direction:column;gap:14px}
+.strat-item{
+  background:var(--white);border:1.5px solid var(--pink);border-radius:14px;
+  padding:18px 20px;display:flex;gap:16px;align-items:flex-start;
+}
+.strat-item .s-icon{
+  width:40px;height:40px;background:var(--light);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.strat-item .s-icon i{color:var(--red);font-size:18px}
+.strat-item h4{font-size:15px;font-weight:900;color:var(--dark);margin-bottom:5px}
+.strat-item h4 strong{
+  background:var(--pink);padding:1px 6px;border-radius:4px;color:var(--accent);
+}
+.strat-item p{font-size:13px;color:var(--gray);line-height:1.6}
+.strat-item p em{color:var(--red);font-style:normal;font-weight:700}
+
+/* ═══════════════════════════════════════
+   SLIDE 5: HISTORY + GAMES (merged)
+═══════════════════════════════════════ */
+#slide-4{
+  background:linear-gradient(180deg,#fff0f3 0%,#fff8fa 100%);
+  padding:0 5vw;
+}
+.hg-layout{
+  display:grid;grid-template-columns:1fr 1fr;gap:20px;
+  padding:20px 0;flex:1;min-height:0;
+}
+.hg-col-title{
+  font-size:13px;font-weight:900;color:var(--red);letter-spacing:.1em;text-transform:uppercase;
+  margin-bottom:12px;display:flex;align-items:center;gap:8px;
+}
+.hg-col-title i{font-size:14px}
+
+/* Timeline list style */
+.tl-list{display:flex;flex-direction:column;gap:10px}
+.tl-row{
+  display:flex;gap:12px;align-items:center;
+  background:var(--white);border:1.5px solid var(--pink);border-radius:14px;
+  overflow:hidden;
+}
+.tl-row.featured{border-color:var(--red);border-width:2px}
+.tl-thumb{
+  width:80px;height:64px;object-fit:cover;flex-shrink:0;display:block;
+}
+.tl-info{padding:8px 12px;flex:1;min-width:0}
+.tl-year{
+  font-family:'Space Mono',monospace;font-size:11px;font-weight:700;
+  color:var(--red);background:var(--light);
+  display:inline-block;padding:1px 7px;border-radius:5px;margin-bottom:4px;
+}
+.tl-row.featured .tl-year{background:var(--red);color:#fff}
+.tl-info h4{font-size:15px;font-weight:900;color:var(--dark);margin-bottom:2px;line-height:1.2}
+.tl-info h4 em{color:var(--red);font-style:normal}
+.tl-info p{font-size:12px;color:var(--gray);line-height:1.4;margin:0}
+
+/* Games grid on right col */
+.games-grid2{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:10px;
+}
+.g-card{
+  background:var(--white);border:1.5px solid var(--pink);border-radius:14px;
+  overflow:hidden;display:flex;flex-direction:column;
+}
+.g-card img{width:100%;height:72px;object-fit:cover;display:block}
+.g-body{padding:10px 12px;flex:1;display:flex;flex-direction:column;gap:4px}
+.g-tag{
+  display:inline-block;font-size:10px;font-weight:700;letter-spacing:.06em;
+  background:var(--light);color:var(--accent);padding:1px 7px;border-radius:5px;
+}
+.g-card h3{font-size:14px;font-weight:900;color:var(--dark);line-height:1.2}
+.g-card h3 u{text-underline-offset:2px;text-decoration-color:var(--pink2)}
+.g-card p{font-size:12px;color:var(--gray);line-height:1.4;flex:1;margin:0}
+.g-card p em{color:var(--red);font-style:normal;font-weight:700}
+/* big featured game card spanning 2 cols */
+.g-card.big{grid-column:span 2;flex-direction:row}
+.g-card.big img{width:120px;height:auto;flex-shrink:0}
+
+/* ═══════════════════════════════════════
+   SLIDE 7: AIM DEMO
+═══════════════════════════════════════ */
+#slide-5{
+  background:linear-gradient(135deg,#fff0f3,#fff8fa);
+  padding:0 5vw;justify-content:center;
+}
+.demo-layout{
+  display:grid;grid-template-columns:1fr 380px;gap:28px;
+  padding:28px 0;align-items:center;justify-content:center;
+}
+.demo-left{}
+.demo-desc{
+  margin-bottom:20px;
+}
+.demo-desc p{font-size:15px;color:var(--gray);line-height:1.7}
+.demo-desc p strong{color:var(--red);font-weight:900}
+.demo-desc p em{font-style:normal;background:var(--pink);padding:1px 6px;border-radius:4px;color:var(--accent)}
+.hud-cards{display:flex;gap:12px;flex-wrap:wrap}
+.hud-card{
+  background:var(--white);border:1.5px solid var(--pink);border-radius:14px;
+  padding:14px 18px;text-align:center;min-width:90px;
+}
+.hud-card .hc-label{font-size:11px;color:var(--gray);font-weight:700;letter-spacing:.08em;margin-bottom:4px}
+.hud-card .hc-val{font-size:26px;font-weight:900;color:var(--red);font-family:'Space Mono',monospace}
+.hud-card .hc-unit{font-size:11px;color:var(--gray);margin-top:2px}
+.start-wrap{margin-top:18px;display:flex;gap:12px;align-items:center}
+.start-btn{
+  background:var(--red);color:#fff;border:none;
+  border-radius:50px;padding:13px 32px;font-size:16px;font-weight:900;
+  cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:10px;
+  font-family:'Noto Sans TC',sans-serif;
+}
+.start-btn:hover{background:var(--accent);transform:translateY(-1px)}
+.start-btn.running{background:var(--gray)}
+.demo-hint{font-size:13px;color:var(--gray);opacity:.7}
+.demo-right{}
+.playfield{
+  width:100%;aspect-ratio:1;border:2px solid var(--pink2);
+  border-radius:20px;background:var(--white);
+  position:relative;overflow:hidden;cursor:crosshair;
+}
+.playfield-bg{
+  position:absolute;inset:0;opacity:.04;
+  background-image:repeating-linear-gradient(0deg,var(--red) 0 1px,transparent 1px 40px),
+    repeating-linear-gradient(90deg,var(--red) 0 1px,transparent 1px 40px);
+}
+.target{
+  position:absolute;width:64px;height:64px;left:50%;top:50%;
+  transform:translate(-50%,-50%);cursor:crosshair;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:50%;
+}
+.t-ring1{
+  position:absolute;width:64px;height:64px;border-radius:50%;
+  border:2px solid var(--red);animation:pulse 1.5s infinite;
+}
+.t-ring2{
+  position:absolute;width:44px;height:44px;border-radius:50%;
+  border:2px solid var(--pink2);
+}
+.t-dot{
+  width:14px;height:14px;border-radius:50%;background:var(--red);
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.1)}}
+.hit-flash{
+  position:absolute;inset:0;border-radius:20px;
+  background:var(--red);opacity:0;pointer-events:none;
+  transition:opacity .1s;
+}
+.hit-flash.show{opacity:.12}
+.miss-indicator{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  font-size:28px;color:var(--gray);opacity:0;pointer-events:none;
+  font-family:'Space Mono',monospace;font-weight:700;
+}
+.miss-indicator.show{animation:miss-anim .3s forwards}
+@keyframes miss-anim{0%{opacity:.8;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-60%) scale(.8)}}
+
+/* ═══════════════════════════════════════
+   SLIDE 8: END
+═══════════════════════════════════════ */
+#slide-6{
+  background:linear-gradient(135deg,#fff0f3 0%,#ffe4ec 50%,#fff8fa 100%);
+  justify-content:center;align-items:center;text-align:center;
+}
+.end-deco{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.end-deco span{position:absolute;border-radius:50%;background:rgba(224,48,85,.07)}
+.end-deco .e1{width:500px;height:500px;top:-120px;right:-120px}
+.end-deco .e2{width:300px;height:300px;bottom:-80px;left:-80px}
+.end-deco .e3{width:200px;height:200px;top:30%;left:10%}
+.end-inner{position:relative;z-index:1;max-width:700px;padding:0 32px}
+.end-icon{font-size:72px;color:var(--red);opacity:.6;margin-bottom:20px}
+.end-title{font-size:clamp(40px,6vw,80px);font-weight:900;color:var(--dark);line-height:1.05;letter-spacing:-2px;margin-bottom:18px}
+.end-title u{text-underline-offset:6px;text-decoration-color:var(--pink2)}
+.end-title em{color:var(--red);font-style:normal}
+.end-sub{font-size:18px;color:var(--gray);line-height:1.7;margin-bottom:36px}
+.end-sub strong{font-weight:900;color:var(--dark)}
+.end-tags{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+.end-tag{
+  background:var(--white);color:var(--dark);
+  padding:8px 20px;border-radius:30px;font-size:14px;font-weight:700;
+  border:1.5px solid var(--pink2);
+  display:flex;align-items:center;gap:8px;
+}
+.end-tag i{font-size:14px;color:var(--red)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .def-grid,.mechanics-grid,.strategy-layout,.demo-layout,.hg-layout{grid-template-columns:1fr}
+  .games-grid2{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:600px){
+  .games-grid2{grid-template-columns:1fr}
+  .cover-title{font-size:42px}
+  .s-title{font-size:26px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ SLIDE 0: COVER ═══ -->
+<div class="slides-wrapper">
+
+<div class="slide active" id="slide-0">
+
+  <div class="cover-deco">
+    <span class="c1"></span><span class="c2"></span><span class="c3"></span>
+  </div>
+  <div class="cover-inner">
+    <div class="stagger"><span class="cover-tag"><i class="fa-solid fa-crosshairs"></i> &nbsp;Game Introduction</span></div>
+    <h1 class="cover-title stagger">第一人稱<br/><em>射擊遊戲</em></h1>
+    <p class="cover-sub stagger"><strong>FPS — First-Person Shooter</strong><br/>深度解析核心玩法、歷史演進與代表作品</p>
+    <div class="cover-pills stagger">
+      <div class="pill"><i class="fa-solid fa-eye"></i>第一人稱視角</div>
+      <div class="pill"><i class="fa-solid fa-gun"></i>射擊戰鬥</div>
+      <div class="pill"><i class="fa-solid fa-trophy"></i>電競競技</div>
+      <div class="pill"><i class="fa-solid fa-users"></i>團隊協作</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 1: WHAT IS FPS ═══ -->
+<div class="slide" id="slide-1">
+
+  <div class="s-header stagger">
+    <span class="s-num">01</span>
+    <h2 class="s-title">什麼是 <em>FPS</em> 遊戲？</h2>
+  </div>
+  <div class="def-grid">
+    <div class="def-card stagger">
+      <div class="icon-wrap"><i class="fa-solid fa-eye"></i></div>
+      <h3><strong>第一人稱視角</strong><br/>First-Person View</h3>
+      <p>玩家以<em>角色本人的雙眼</em>進行遊戲，看見角色眼前的真實畫面。<br/><br/>
+      提升<u>沉浸感與臨場感</u>，使玩家貼近戰場氛圍。<br/><br/>
+      武器顯示於畫面右下角或中央，<em>槍感</em>至關重要。</p>
+    </div>
+    <div class="def-card stagger">
+      <div class="icon-wrap"><i class="fa-solid fa-bullseye"></i></div>
+      <h3><strong>核心定義</strong><br/>Core Definition</h3>
+      <p>FPS 是 <em>First-Person Shooter</em> 的縮寫。<br/><br/>
+      玩家使用<u>槍械或其他武器</u>進行射擊與戰鬥。<br/><br/>
+      強調<em>快節奏戰鬥</em>，常作為<u>電子競技項目</u>使用。</p>
+    </div>
+    <div class="def-card stagger">
+      <div class="icon-wrap"><i class="fa-solid fa-gamepad"></i></div>
+      <h3><strong>沉浸體驗</strong><br/>Immersive Experience</h3>
+      <p>玩家如同<em>置身其中</em>，感受前所未有的臨場感。<br/><br/>
+      搭配<u>高品質音效</u>，聽聲辨位判斷敵人位置。<br/><br/>
+      視覺反饋與<em>手感回應</em>決定遊戲體驗品質。</p>
+    </div>
+    <div class="def-card stagger">
+      <div class="icon-wrap"><i class="fa-solid fa-ranking-star"></i></div>
+      <h3><strong>競技層面</strong><br/>Competitive Scene</h3>
+      <p>FPS 是全球<em>最熱門的電競類型</em>之一。<br/><br/>
+      需要<u>反應速度、策略思維</u>與團隊協作能力。<br/><br/>
+      頂尖賽事獎金高達<em>數百萬美元</em>。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 2: CORE MECHANICS ═══ -->
+<div class="slide" id="slide-2">
+
+  <div class="s-header stagger">
+    <span class="s-num">02</span>
+    <h2 class="s-title"><u>操作核心</u> Core Mechanics</h2>
+  </div>
+  <div class="mechanics-grid">
+    <div class="mech-card stagger">
+      <div class="mech-icon"><i class="fa-solid fa-person-running"></i></div>
+      <h4><u>移動操作</u></h4>
+      <ul>
+        <li><strong>前後左右</strong>行走移動</li>
+        <li><em>奔跑</em>加速衝刺</li>
+        <li>跳躍、<strong>蹲伏</strong>、滑行</li>
+        <li>攀爬、<em>翻越</em>障礙物</li>
+      </ul>
+    </div>
+    <div class="mech-card stagger">
+      <div class="mech-icon"><i class="fa-solid fa-crosshairs"></i></div>
+      <h4><u>瞄準與射擊</u></h4>
+      <ul>
+        <li>滑鼠/搖桿<strong>控制準星</strong></li>
+        <li><em>點射</em>精準射擊</li>
+        <li>連射、<strong>壓槍</strong>技巧</li>
+        <li>後坐力<em>控制</em>能力</li>
+      </ul>
+    </div>
+    <div class="mech-card stagger">
+      <div class="mech-icon"><i class="fa-solid fa-gun"></i></div>
+      <h4><u>武器操作</u></h4>
+      <ul>
+        <li><strong>換彈</strong>與切換武器</li>
+        <li>裝備<em>手榴彈</em>道具</li>
+        <li>使用<strong>瞄具</strong>（紅點/狙鏡）</li>
+        <li><em>閃光彈</em>、煙霧彈</li>
+      </ul>
+    </div>
+    <div class="mech-card stagger">
+      <div class="mech-icon"><i class="fa-solid fa-bolt"></i></div>
+      <h4><u>反應與預判</u></h4>
+      <ul>
+        <li><em>快速鎖定</em>敵人位置</li>
+        <li>即時<strong>射擊或閃避</strong></li>
+        <li>預判敵人<em>移動路徑</em></li>
+        <li><strong>毫秒級</strong>反應速度</li>
+      </ul>
+    </div>
+    <div class="mech-card stagger">
+      <div class="mech-icon"><i class="fa-solid fa-ear-listen"></i></div>
+      <h4><u>聽聲辨位</u></h4>
+      <ul>
+        <li>判斷<em>腳步聲</em>方向</li>
+        <li>識別<strong>開槍聲</strong>位置</li>
+        <li>換彈聲音<em>預警</em></li>
+        <li>音效決定<strong>勝負</strong></li>
+      </ul>
+    </div>
+    <div class="mech-card stagger">
+      <div class="mech-icon"><i class="fa-solid fa-brain"></i></div>
+      <h4><u>心理素質</u></h4>
+      <ul>
+        <li>高壓下<em>穩定發揮</em></li>
+        <li>保持<strong>冷靜判斷</strong></li>
+        <li>失誤後<em>快速調整</em></li>
+        <li>團隊中<strong>溝通協作</strong></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 3: STRATEGY ═══ -->
+<div class="slide" id="slide-3">
+
+  <div class="s-header stagger">
+    <span class="s-num">03</span>
+    <h2 class="s-title">策略層面 <em>Strategy</em></h2>
+  </div>
+  <div class="strategy-layout">
+    <div class="strat-main stagger">
+      <div class="big-icon"><i class="fa-solid fa-chess"></i></div>
+      <h3>FPS 不只是<br/><u>「射擊遊戲」</u></h3>
+      <p>FPS 的頂尖競技需要<em>深度策略思維</em>。<br/><br/>
+      地圖控制、資源管理、<em>資訊博弈</em>——<br/>每一個決策都影響勝負。</p>
+      <p>真正的高手在<em>腦力對決</em>中<br/>超越對手。</p>
+    </div>
+    <div class="strat-right">
+      <div class="strat-item stagger">
+        <div class="s-icon"><i class="fa-solid fa-map"></i></div>
+        <div>
+          <h4><strong>地圖控制</strong> Map Control</h4>
+          <p>掌握<em>關鍵點位</em>、制高點、掩體與捷徑。<br/>走位卡點，利用地形<em>最大化優勢</em>。</p>
+        </div>
+      </div>
+      <div class="strat-item stagger">
+        <div class="s-icon"><i class="fa-solid fa-coins"></i></div>
+        <div>
+          <h4><strong>經濟系統</strong> Economy</h4>
+          <p>合理分配<em>資源與預算</em>，決定買何種武器。<br/>「<em>省錢局</em>」與「全買局」影響整場戰局。</p>
+        </div>
+      </div>
+      <div class="strat-item stagger">
+        <div class="s-icon"><i class="fa-solid fa-walkie-talkie"></i></div>
+        <div>
+          <h4><strong>報點溝通</strong> Callouts</h4>
+          <p>透過語音<em>報告敵人位置</em>，共享戰場資訊。<br/>精準的溝通<em>決定隊伍勝率</em>。</p>
+        </div>
+      </div>
+      <div class="strat-item stagger">
+        <div class="s-icon"><i class="fa-solid fa-users-gear"></i></div>
+        <div>
+          <h4><strong>角色分工</strong> Role Division</h4>
+          <p><em>前鋒、支援、狙擊</em>各司其職。<br/>合理的分工<em>才能發揮團隊最大戰力</em>。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 4: HISTORY + GAMES (merged) ═══ -->
+<div class="slide" id="slide-4">
+
+  <div class="s-header stagger">
+    <span class="s-num">04</span>
+    <h2 class="s-title"><em>發展歷史</em> &amp; 代表<u>作品</u></h2>
+  </div>
+  <div class="hg-layout">
+
+    <!-- LEFT: Timeline -->
+    <div>
+      <div class="hg-col-title stagger"><i class="fa-solid fa-clock-rotate-left"></i> Timeline 歷史演進</div>
+      <div class="tl-list">
+        <div class="tl-row stagger">
+          <img class="tl-thumb" src="https://i.ibb.co/0pmQ34r7/IMG-0770.jpg" alt="DOOM"/>
+          <div class="tl-info">
+            <div class="tl-year">1993</div>
+            <h4><em>DOOM</em></h4>
+            <p>奠定高速節奏與關卡設計，革命性之作</p>
+          </div>
+        </div>
+        <div class="tl-row stagger">
+          <img class="tl-thumb" src="https://i.ibb.co/MxRwSJ2J/IMG-0771.png" alt="Half-Life"/>
+          <div class="tl-info">
+            <div class="tl-year">1998</div>
+            <h4>Half-<em>Life</em></h4>
+            <p>敘事沉浸的里程碑，單機體驗質量飛躍</p>
+          </div>
+        </div>
+        <div class="tl-row featured stagger">
+          <img class="tl-thumb" src="https://i.ibb.co/RG1FRZHB/IMG-0772.png" alt="Counter-Strike"/>
+          <div class="tl-info">
+            <div class="tl-year">1999</div>
+            <h4>Counter-<em>Strike</em></h4>
+            <p>戰術與經濟系統，長青電競代表</p>
+          </div>
+        </div>
+        <div class="tl-row stagger">
+          <img class="tl-thumb" src="https://i.ibb.co/0VDBXKhL/IMG-0773.webp" alt="CoD4"/>
+          <div class="tl-info">
+            <div class="tl-year">2007</div>
+            <h4>CoD4: <em>Modern Warfare</em></h4>
+            <p>現代軍事題材，帶動 FPS 主流化浪潮</p>
+          </div>
+        </div>
+        <div class="tl-row stagger">
+          <img class="tl-thumb" src="https://i.ibb.co/wZ8KqQ4w/IMG-0774.png" alt="Overwatch"/>
+          <div class="tl-info">
+            <div class="tl-year">2016</div>
+            <h4><em>Overwatch</em></h4>
+            <p>英雄技能與角色分工，強調團隊協作</p>
+          </div>
+        </div>
+        <div class="tl-row featured stagger">
+          <img class="tl-thumb" src="https://i.ibb.co/7dkWXbHb/IMG-0775.png" alt="VALORANT"/>
+          <div class="tl-info">
+            <div class="tl-year">2020</div>
+            <h4><em>VALORANT</em></h4>
+            <p>戰術射擊結合技能，嚴謹反外掛電競</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Games -->
+    <div>
+      <div class="hg-col-title stagger"><i class="fa-solid fa-gamepad"></i> Iconic Games 代表作品</div>
+      <div class="games-grid2">
+        <div class="g-card stagger">
+          <img src="https://i.ibb.co/yBGq5KZ1/IMG-0765.jpg" alt="Call of Duty"/>
+          <div class="g-body">
+            <span class="g-tag"><i class="fa-solid fa-fire"></i> 動作爽快</span>
+            <h3><u>Call of Duty</u></h3>
+            <p>快節奏爽快手感，<em>熱門大作</em></p>
+          </div>
+        </div>
+        <div class="g-card stagger">
+          <img src="https://i.ibb.co/W4VcwTWQ/IMG-0766.jpg" alt="CS2"/>
+          <div class="g-body">
+            <span class="g-tag"><i class="fa-solid fa-crown"></i> 電競王者</span>
+            <h3><u>Counter-Strike 2</u></h3>
+            <p>戰術博弈，<em>經典電競</em></p>
+          </div>
+        </div>
+        <div class="g-card stagger">
+          <img src="https://i.ibb.co/bMFpf4gW/IMG-0767.jpg" alt="R6S"/>
+          <div class="g-body">
+            <span class="g-tag"><i class="fa-solid fa-shield"></i> 戰術深度</span>
+            <h3><u>Rainbow Six Siege</u></h3>
+            <p>破壞情報，<em>極致對抗</em></p>
+          </div>
+        </div>
+        <div class="g-card stagger">
+          <img src="https://i.ibb.co/bRP3mHnx/IMG-0768.jpg" alt="VALORANT"/>
+          <div class="g-body">
+            <span class="g-tag"><i class="fa-solid fa-star"></i> 技能射擊</span>
+            <h3><u>VALORANT</u></h3>
+            <p>精準手感，<em>電競導向</em></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ SLIDE 5: AIM DEMO ═══ -->
+<div class="slide" id="slide-5">
+
+  <div class="s-header stagger">
+    <span class="s-num">05</span>
+    <h2 class="s-title">操作體驗 <em>Aim</em> <u>Practice</u></h2>
+  </div>
+  <div class="demo-layout">
+    <div class="demo-left">
+      <div class="demo-desc stagger">
+        <p>體驗 FPS 最核心的技能：<strong>精準瞄準</strong>。</p>
+        <p>點擊<em>靶心</em>加分，目標會在被擊中後<strong>瞬間移位</strong>。</p>
+        <p>測試你的<strong>反應速度</strong>與<em>精準度</em>！</p>
+      </div>
+      <div class="hud-cards stagger">
+        <div class="hud-card">
+          <div class="hc-label"><i class="fa-solid fa-star"></i> 分數</div>
+          <div class="hc-val" id="score">0</div>
+        </div>
+        <div class="hud-card">
+          <div class="hc-label"><i class="fa-solid fa-clock"></i> 時間</div>
+          <div class="hc-val" id="time">30</div>
+          <div class="hc-unit">秒</div>
+        </div>
+        <div class="hud-card">
+          <div class="hc-label"><i class="fa-solid fa-percent"></i> 精準</div>
+          <div class="hc-val" id="acc">—</div>
+        </div>
+      </div>
+      <div class="start-wrap stagger">
+        <button class="start-btn" id="start-btn">
+          <i class="fa-solid fa-play"></i> 開始挑戰
+        </button>
+        <span class="demo-hint">30秒挑戰</span>
+      </div>
+    </div>
+    <div class="demo-right stagger">
+      <div class="playfield" id="playfield">
+        <div class="playfield-bg"></div>
+        <div class="hit-flash" id="hit-flash"></div>
+        <div class="target" id="target">
+          <div class="t-ring1"></div>
+          <div class="t-ring2"></div>
+          <div class="t-dot"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 6: END ═══ -->
+<div class="slide" id="slide-6">
+
+  <div class="end-deco">
+    <span class="e1"></span><span class="e2"></span><span class="e3"></span>
+  </div>
+  <div class="end-inner">
+    <div class="end-icon stagger"><i class="fa-solid fa-crosshairs"></i></div>
+    <h2 class="end-title stagger">準備好了嗎？<br/><em><u>加入戰場！</u></em></h2>
+    <p class="end-sub stagger">FPS 遊戲的世界等待著你。<br/><strong>從基礎練起，踏上成為頂尖玩家的道路。</strong></p>
+    <div class="end-tags stagger">
+      <div class="end-tag"><i class="fa-solid fa-graduation-cap"></i> 持續練習</div>
+      <div class="end-tag"><i class="fa-solid fa-users"></i> 團隊合作</div>
+      <div class="end-tag"><i class="fa-solid fa-chart-line"></i> 不斷進步</div>
+      <div class="end-tag"><i class="fa-solid fa-fire"></i> 享受遊戲</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /slides-wrapper -->
+
+<!-- ── CONTROLS ── -->
+<div class="controls">
+  <button class="ctrl-btn" id="prev-btn" title="上一頁"><i class="fa-solid fa-chevron-left"></i></button>
+  <button class="ctrl-btn" id="play-btn" title="播放/暫停"><i class="fa-solid fa-pause"></i></button>
+  <div class="dots" id="dots"></div>
+  <span class="slide-counter" id="counter">1 / 8</span>
+  <button class="ctrl-btn" id="next-btn" title="下一頁"><i class="fa-solid fa-chevron-right"></i></button>
+</div>
+
+<script>
+const TOTAL = 7;
+const INTERVAL = 5000;
+const slides = document.querySelectorAll('.slide');
+let current = 0, timer = null, playing = true;
+
+const dotsEl = document.getElementById('dots');
+const counterEl = document.getElementById('counter');
+const playBtn = document.getElementById('play-btn');
+
+// Build dots
+for(let i=0;i<TOTAL;i++){
+  const d = document.createElement('div');
+  d.className='dot'+(i===0?' active':'');
+  d.addEventListener('click',()=>goTo(i));
+  dotsEl.appendChild(d);
+}
+
+function updateUI(){
+  document.querySelectorAll('.dot').forEach((d,i)=>{
+    d.classList.toggle('active',i===current);
+  });
+  counterEl.textContent=(current+1)+' / '+TOTAL;
+}
+
+function goTo(idx,dir=1){
+  if(idx===current)return;
+  const old=current;
+  current=((idx%TOTAL)+TOTAL)%TOTAL;
+  slides[old].classList.remove('active');
+  slides[old].classList.add('exit');
+  setTimeout(()=>slides[old].classList.remove('exit'),700);
+  slides[current].classList.add('active');
+  updateUI();
+}
+
+document.getElementById('prev-btn').addEventListener('click',()=>{
+  const idx=(current-1+TOTAL)%TOTAL;
+  goTo(idx,-1);
+  resetTimer();
+});
+document.getElementById('next-btn').addEventListener('click',()=>{
+  goTo((current+1)%TOTAL,1);
+  resetTimer();
+});
+
+function startTimer(){
+  timer=setInterval(()=>goTo((current+1)%TOTAL,1),INTERVAL);
+}
+function stopTimer(){clearInterval(timer);timer=null}
+function resetTimer(){if(playing){stopTimer();startTimer()}}
+
+playBtn.addEventListener('click',()=>{
+  playing=!playing;
+  if(playing){
+    startTimer();
+    playBtn.innerHTML='<i class="fa-solid fa-pause"></i>';
+  } else {
+    stopTimer();
+    playBtn.innerHTML='<i class="fa-solid fa-play"></i>';
+  }
+});
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'){goTo((current+1)%TOTAL,1);resetTimer()}
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp'){goTo((current-1+TOTAL)%TOTAL,-1);resetTimer()}
+  if(e.key===' '){playBtn.click()}
+});
+
+// Start auto play
+startTimer();
+updateUI();
+
+// ── AIM DEMO ──
+const scoreEl=document.getElementById('score');
+const timeEl=document.getElementById('time');
+const accEl=document.getElementById('acc');
+const startBtn=document.getElementById('start-btn');
+const playfield=document.getElementById('playfield');
+const targetEl=document.getElementById('target');
+const hitFlash=document.getElementById('hit-flash');
+
+let score=0,hits=0,misses=0,running=false,rafId=null,startT=0;
+const DURATION=30;
+
+function placeTarget(){
+  const pw=playfield.clientWidth,ph=playfield.clientHeight;
+  const tw=targetEl.offsetWidth,th=targetEl.offsetHeight;
+  const pad=12;
+  const x=pad+Math.random()*(pw-tw-pad*2);
+  const y=pad+Math.random()*(ph-th-pad*2);
+  targetEl.style.left=x+'px';
+  targetEl.style.top=y+'px';
+}
+
+function updateAcc(){
+  const t=hits+misses;
+  accEl.textContent=t===0?'—':Math.round(hits/t*100)+'%';
+}
+
+function tick(){
+  const elapsed=(performance.now()-startT)/1000;
+  const left=Math.max(0,DURATION-elapsed);
+  timeEl.textContent=left.toFixed(0);
+  if(elapsed>=DURATION){endGame();return}
+  rafId=requestAnimationFrame(tick);
+}
+
+function startGame(){
+  if(running)return;
+  running=true;score=0;hits=0;misses=0;
+  scoreEl.textContent='0';accEl.textContent='—';timeEl.textContent=DURATION;
+  startBtn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> 進行中';
+  startBtn.classList.add('running');
+  placeTarget();
+  startT=performance.now();
+  tick();
+}
+
+function endGame(){
+  running=false;cancelAnimationFrame(rafId);
+  startBtn.innerHTML='<i class="fa-solid fa-rotate-right"></i> 再試一次';
+  startBtn.classList.remove('running');
+}
+
+function doHit(){
+  if(!running)return;
+  score++;hits++;
+  scoreEl.textContent=score;
+  updateAcc();
+  hitFlash.classList.add('show');
+  setTimeout(()=>hitFlash.classList.remove('show'),100);
+  targetEl.animate([{transform:'scale(1)'},{transform:'scale(.7)'},{transform:'scale(1)'}],{duration:100,easing:'ease-out'});
+  placeTarget();
+}
+
+function doMiss(){
+  if(!running)return;
+  misses++;updateAcc();
+}
+
+startBtn.addEventListener('click',startGame);
+targetEl.addEventListener('click',e=>{e.stopPropagation();doHit()});
+playfield.addEventListener('click',()=>doMiss());
+</script>
+</body>
+</html>
